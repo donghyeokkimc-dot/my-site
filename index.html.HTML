@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>간선 회수비용 및 운영 실적 분석 대시보드 (Dark Mode)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js & Datalabels Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+    body { 
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; 
+      background-color: #070a12; 
+      color: #f1f5f9;
+    }
+    .report-page {
+      background: #111827;
+      min-height: 100vh;
+      border: 1px solid #1e293b;
+      box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.7), 0 8px 15px -6px rgba(0, 0, 0, 0.6);
+    }
+    
+    @media print {
+      body { background-color: #070a12 !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .report-page { 
+        box-shadow: none !important; 
+        margin-bottom: 0 !important; 
+        page-break-after: always; 
+        break-after: page; 
+        min-height: 100vh; 
+        padding: 20px !important;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="py-8 px-4 md:px-12 lg:px-20">
+
+  <!-- Top Floating Toolbar -->
+  <div class="max-w-7xl mx-auto mb-6 flex justify-between items-center no-print">
+    <div class="flex items-center gap-3">
+      <span class="w-3 h-3 rounded-full bg-[#3b82f6] animate-pulse"></span>
+      <span class="text-slate-300 text-sm font-bold tracking-wide">간선 회수 운영 및 비용 분석 보고서 (Dark Edition)</span>
+    </div>
+    <button onclick="window.print()" class="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-900/40 transition flex items-center gap-2">
+      <i class="fa-solid fa-file-pdf"></i> PDF 저장 / 인쇄
+    </button>
+  </div>
+
+  <div class="max-w-7xl mx-auto space-y-12">
+
+    <!-- ================= PAGE 1: 레퍼런스 레이아웃 반영 (KPI + 권역별 차트 + 권역별 요약표) ================= -->
+    <section class="report-page p-8 md:p-12 rounded-3xl mb-12 flex flex-col justify-between">
+      <div>
+        <!-- Page Header -->
+        <div class="border-b-2 border-slate-700 pb-5 mb-7 flex justify-between items-end">
+          <div>
+            <span class="text-xs font-bold tracking-widest uppercase text-[#60a5fa]">PAGE 01 • EXECUTIVE OVERVIEW</span>
+            <h1 class="text-3xl font-extrabold text-white mt-1">2026년 권역별 회수비용 및 사업계획(BP) 대비 실적 분석</h1>
+            <p class="text-xs text-slate-400 mt-1">간선 회수 프로세스 비용 집계 데이터 (정규 실적 집계 구간: 1월 ~ 10월)</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold px-3.5 py-1.5 bg-[#1e293b] text-[#60a5fa] border border-slate-700 rounded-full">PAGE 1 / 5</span>
+          </div>
+        </div>
+
+        <!-- 1. 핵심 실적 요약 (1~10월 누계) -->
+        <div class="flex items-center gap-2 mb-3.5">
+          <span class="w-1 h-4 bg-[#3b82f6] rounded-full"></span>
+          <h2 class="text-base font-bold text-[#60a5fa]">1. 핵심 실적 요약 (1~10월 누계)</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-7">
+          <div class="p-5 rounded-2xl bg-[#161f33] border border-slate-800 border-l-4 border-l-slate-400">
+            <span class="text-xs font-semibold text-slate-400">사업계획 (BP) 총 예산</span>
+            <div class="text-2xl font-black text-white mt-1.5">7.55억 원</div>
+            <div class="text-xs text-slate-400 mt-1">₩755,150,000 (월평균 7,551만)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-[#162238] border border-blue-900/60 border-l-4 border-l-[#3b82f6]">
+            <span class="text-xs font-semibold text-[#60a5fa]">실제 집행 회수비용</span>
+            <div class="text-2xl font-black text-white mt-1.5">6.44억 원</div>
+            <div class="text-xs text-slate-400 mt-1">₩644,505,000 (월평균 6,445만)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-[#0f2922] border border-emerald-800/60 border-l-4 border-l-[#10b981]">
+            <span class="text-xs font-semibold text-[#34d399]">누적 비용 절감액</span>
+            <div class="text-2xl font-black text-[#34d399] mt-1.5">1.10억 원</div>
+            <div class="text-xs text-slate-400 mt-1">₩110,645,000 (월평균 1,106만)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-[#0f2922] border border-emerald-800/60 border-l-4 border-l-[#10b981]">
+            <span class="text-xs font-semibold text-[#34d399]">종합 누적 절감율</span>
+            <div class="text-2xl font-black text-[#34d399] mt-1.5">14.65%</div>
+            <div class="text-xs text-slate-400 mt-1">예산 집행률 85.35% (전 권역 절감)</div>
+          </div>
+        </div>
+
+        <!-- 2. 권역별 예산 대비 실적, 절감액 및 기여도 -->
+        <div class="flex items-center gap-2 mb-3.5">
+          <span class="w-1 h-4 bg-[#3b82f6] rounded-full"></span>
+          <h2 class="text-base font-bold text-[#60a5fa]">2. 권역별 예산 대비 실적, 절감액 및 기여도</h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+          <!-- 좌측 막대 차트 (7칸) -->
+          <div class="lg:col-span-7 p-5 rounded-2xl bg-[#161f33] border border-slate-800">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-sm font-bold text-slate-100">권역별 BP · 실제비용 · 절감액 (단위: 백만 원)</h3>
+              <div class="flex items-center gap-3 text-xs font-semibold text-slate-300">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-slate-500 rounded-sm"></span>BP</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-[#3b82f6] rounded-sm"></span>실제</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-[#10b981] rounded-sm"></span>절감액</span>
+              </div>
+            </div>
+            <div class="h-60 w-full">
+              <canvas id="chartRegionComp"></canvas>
+            </div>
+          </div>
+
+          <!-- 우측 도넛 차트 + 범례 카드 (5칸) -->
+          <div class="lg:col-span-5 p-5 rounded-2xl bg-[#161f33] border border-slate-800 flex flex-col justify-between">
+            <h3 class="text-sm font-bold text-slate-100 mb-2">권역별 총 절감액 기여도 비중 (%)</h3>
+            <div class="flex items-center justify-between gap-3 my-auto">
+              <div class="h-52 w-52 relative flex-shrink-0">
+                <canvas id="chartRegionDonut"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span class="text-[11px] font-semibold text-slate-400">총 절감액</span>
+                  <span class="text-base font-black text-[#34d399]">1.10억</span>
+                </div>
+              </div>
+              <div class="flex-1 space-y-2 text-xs">
+                <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-[#1e293b]/80 border border-slate-700/70">
+                  <span class="flex items-center gap-2 font-bold text-slate-200"><span class="w-2.5 h-2.5 rounded-sm bg-[#1d4ed8]"></span>수도권</span>
+                  <span class="text-slate-300"><strong class="text-white">44.4%</strong> (4,918만)</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-[#1e293b]/80 border border-slate-700/70">
+                  <span class="flex items-center gap-2 font-bold text-slate-200"><span class="w-2.5 h-2.5 rounded-sm bg-[#3b82f6]"></span>호남권</span>
+                  <span class="text-slate-300"><strong class="text-white">22.7%</strong> (2,509만)</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-[#1e293b]/80 border border-slate-700/70">
+                  <span class="flex items-center gap-2 font-bold text-slate-200"><span class="w-2.5 h-2.5 rounded-sm bg-[#60a5fa]"></span>충청권</span>
+                  <span class="text-slate-300"><strong class="text-white">19.3%</strong> (2,134만)</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-[#1e293b]/80 border border-slate-700/70">
+                  <span class="flex items-center gap-2 font-bold text-slate-200"><span class="w-2.5 h-2.5 rounded-sm bg-[#93c5fd]"></span>동남권</span>
+                  <span class="text-slate-300"><strong class="text-white">13.6%</strong> (1,505만)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 권역별 요약 테이블 -->
+        <div class="rounded-2xl border border-slate-800 overflow-hidden">
+          <table class="w-full text-xs text-right">
+            <thead class="bg-[#0b0f19] text-slate-300 font-semibold border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4 text-left">권역 구분</th>
+                <th class="py-3 px-4">BP 예산</th>
+                <th class="py-3 px-4">실제 회수비용</th>
+                <th class="py-3 px-4">비용 절감액</th>
+                <th class="py-3 px-4">절감율</th>
+                <th class="py-3 px-4">절감 기여도</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80 text-slate-300 bg-[#161f33]">
+              <tr class="hover:bg-[#1e293b]/60">
+                <td class="py-2.5 px-4 text-left font-bold text-white">수도권</td>
+                <td class="py-2.5 px-4">₩246,500,000</td>
+                <td class="py-2.5 px-4">₩197,325,000</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-200">₩49,175,000</td>
+                <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-[#34d399] border border-emerald-800/70 font-bold">19.95%</span></td>
+                <td class="py-2.5 px-4 font-semibold">44.4%</td>
+              </tr>
+              <tr class="hover:bg-[#1e293b]/60">
+                <td class="py-2.5 px-4 text-left font-bold text-white">충청권</td>
+                <td class="py-2.5 px-4">₩125,850,000</td>
+                <td class="py-2.5 px-4">₩104,515,000</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-200">₩21,335,000</td>
+                <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-[#34d399] border border-emerald-800/70 font-bold">16.95%</span></td>
+                <td class="py-2.5 px-4 font-semibold">19.3%</td>
+              </tr>
+              <tr class="hover:bg-[#1e293b]/60">
+                <td class="py-2.5 px-4 text-left font-bold text-white">동남권</td>
+                <td class="py-2.5 px-4">₩180,000,000</td>
+                <td class="py-2.5 px-4">₩164,955,000</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-200">₩15,045,000</td>
+                <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-[#34d399] border border-emerald-800/70 font-bold">8.36%</span></td>
+                <td class="py-2.5 px-4 font-semibold">13.6%</td>
+              </tr>
+              <tr class="hover:bg-[#1e293b]/60">
+                <td class="py-2.5 px-4 text-left font-bold text-white">호남권</td>
+                <td class="py-2.5 px-4">₩202,800,000</td>
+                <td class="py-2.5 px-4">₩177,710,000</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-200">₩25,090,000</td>
+                <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded bg-emerald-950 text-[#34d399] border border-emerald-800/70 font-bold">12.37%</span></td>
+                <td class="py-2.5 px-4 font-semibold">22.7%</td>
+              </tr>
+              <tr class="bg-[#1e293b] font-extrabold text-white border-t-2 border-slate-600">
+                <td class="py-3 px-4 text-left">합계</td>
+                <td class="py-3 px-4">₩755,150,000</td>
+                <td class="py-3 px-4">₩644,505,000</td>
+                <td class="py-3 px-4 text-[#34d399]">₩110,645,000</td>
+                <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-[#10b981] text-slate-950 font-black">14.65%</span></td>
+                <td class="py-3 px-4">100.0%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-4 border-t border-slate-800 flex justify-between text-xs text-slate-500">
+        <span></span>
+        <span>1 / 5</span>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 2: 월별 BP 추이 및 부자재 품목 비중 ================= -->
+    <section class="report-page p-8 md:p-12 rounded-3xl mb-12 flex flex-col justify-between">
+      <div>
+        <!-- Page Header -->
+        <div class="border-b-2 border-slate-700 pb-5 mb-7 flex justify-between items-end">
+          <div>
+            <span class="text-xs font-bold tracking-widest uppercase text-[#60a5fa]">PAGE 02 • TREND & BREAKDOWN</span>
+            <h1 class="text-3xl font-extrabold text-white mt-1">월별 회수비용 추이 및 부자재 품목 비중</h1>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold px-3.5 py-1.5 bg-[#1e293b] text-[#60a5fa] border border-slate-700 rounded-full">PAGE 2 / 5</span>
+          </div>
+        </div>
+
+        <!-- 월별 추이 차트 -->
+        <div class="p-6 rounded-2xl bg-[#161f33] border border-slate-800 mb-6">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white">전 권역 BP 회수 예산 대비 실제 회수비용 추이 및 절감율</h2>
+              <p class="text-xs text-slate-400">막대: 예산 및 실비용(백만 원) / 꺾은선: BP 대비 절감율(%)</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs font-semibold text-slate-300">
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-500 rounded-sm"></span>BP회수</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-[#3b82f6] rounded-sm"></span>회수비용</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-[#10b981]"></span>절감율(%)</span>
+            </div>
+          </div>
+          <div class="h-64 w-full">
+            <canvas id="chartTrend"></canvas>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Item Share Chart -->
+          <div class="p-6 rounded-2xl bg-[#161f33] border border-slate-800 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <h3 class="text-base font-bold text-white">부자재 회수 품목별 물량 및 비중</h3>
+                <span class="text-xs font-bold text-slate-300 bg-[#1e293b] px-2.5 py-1 rounded-lg border border-slate-700">월평균 20,320 PLT</span>
+              </div>
+              <p class="text-xs text-slate-400 mb-3">도넛 그래프 내: 파레트 수량(PLT) 및 점유율(%) 직접 표시</p>
+              <div class="h-52 w-full flex items-center justify-center">
+                <canvas id="chartItemShare"></canvas>
+              </div>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2.5 text-xs bg-[#0f172a] p-3.5 rounded-xl border border-slate-800">
+              <div class="flex justify-between text-slate-300"><span>회수 파레트:</span><span class="font-bold text-[#60a5fa]">9,169.1 PLT (45.1%)</span></div>
+              <div class="flex justify-between text-slate-300"><span>재사용 포장재:</span><span class="font-bold text-[#3b82f6]">8,912.6 PLT (43.9%)</span></div>
+              <div class="flex justify-between text-slate-300"><span>반품 파레트:</span><span class="font-bold text-[#93c5fd]">1,294.5 PLT (6.4%)</span></div>
+              <div class="flex justify-between text-slate-300"><span>단프라 파레트:</span><span class="font-bold text-slate-400">943.9 PLT (4.6%)</span></div>
+            </div>
+          </div>
+
+          <!-- Regional Cost Chart (10월) & Highlight -->
+          <div class="p-6 rounded-2xl bg-[#161f33] border border-slate-800 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <h3 class="text-base font-bold text-white">권역별 회수비용 집행액 및 비중 (10월)</h3>
+                <span class="text-xs font-bold text-[#60a5fa] bg-[#1e293b] px-2.5 py-1 rounded-lg border border-slate-700">10월 총액: 63,996,000원</span>
+              </div>
+              <p class="text-xs text-slate-400 mb-3">막대 상단: 권역별 집행 금액(백만 원) 및 비중(%) 표기</p>
+              <div class="h-52 w-full">
+                <canvas id="chartRegional"></canvas>
+              </div>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2.5 text-xs bg-[#0f172a] p-3.5 rounded-xl border border-slate-800">
+              <div class="flex justify-between text-slate-300"><span>수도권 (김포/평택):</span><span class="font-bold text-[#60a5fa]">19,155,000원 (29.9%)</span></div>
+              <div class="flex justify-between text-slate-300"><span>호남권 (GW/JU/YS/JI):</span><span class="font-bold text-[#3b82f6]">17,771,000원 (27.8%)</span></div>
+              <div class="flex justify-between text-slate-300"><span>동남권 (BS/UL/GC 외):</span><span class="font-bold text-[#93c5fd]">16,605,000원 (25.9%)</span></div>
+              <div class="flex justify-between text-slate-300"><span>충청권 (CA/CS/DJ):</span><span class="font-bold text-slate-400">10,465,000원 (16.4%)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-4 border-t border-slate-800 flex justify-between text-xs text-slate-500">
+        <span></span>
+        <span>2 / 5</span>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 3: 수도권 TC & 요일별 패턴 ================= -->
+    <section class="report-page p-8 md:p-12 rounded-3xl mb-12 flex flex-col justify-between">
+      <div>
+        <!-- Page Header -->
+        <div class="border-b-2 border-slate-700 pb-5 mb-8 flex justify-between items-end">
+          <div>
+            <span class="text-xs font-bold tracking-widest uppercase text-[#60a5fa]">PAGE 03 • OPERATIONS</span>
+            <h1 class="text-3xl font-extrabold text-white mt-1">수도권 TC별 실적 및 요일별 회수 패턴</h1>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold px-3.5 py-1.5 bg-[#1e293b] text-[#60a5fa] border border-slate-700 rounded-full">PAGE 3 / 5</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <!-- 김포 vs 평택 비교 -->
+          <div class="p-6 rounded-2xl bg-[#161f33] border border-slate-800">
+            <h3 class="text-lg font-bold text-white mb-1">수도권 TC(김포 vs 평택) 월별 회수비용 추이</h3>
+            <p class="text-xs text-slate-400 mb-4">단위: 백만 원 (숫자 및 TC별 비중 표시)</p>
+            <div class="h-64 w-full">
+              <canvas id="chartHub"></canvas>
+            </div>
+            <div class="mt-4 p-3.5 bg-[#0f172a] rounded-xl border border-slate-800 text-xs flex justify-between text-slate-300">
+              <div>10월 김포 TC: <span class="font-bold text-[#60a5fa]">13,620,000원 (62.4%)</span></div>
+              <div>10월 평택 TC: <span class="font-bold text-slate-400">8,205,000원 (37.6%)</span></div>
+            </div>
+          </div>
+
+          <!-- 요일별 회수 배차 패턴 -->
+          <div class="p-6 rounded-2xl bg-[#161f33] border border-slate-800">
+            <h3 class="text-lg font-bold text-white mb-1">전 권역 요일별 회수차량 일평균 배차 대수</h3>
+            <p class="text-xs text-slate-400 mb-4">회수 요일별 실적(1~10월) 기반 일평균 대수 및 점유율(%)</p>
+            <div class="h-64 w-full">
+              <canvas id="chartDayPattern"></canvas>
+            </div>
+            <div class="mt-4 p-3.5 bg-[#0f172a] rounded-xl border border-slate-800 text-xs flex justify-between text-slate-300">
+              <div>화·수 피크 평균: <span class="font-bold text-[#60a5fa]">57.4대 (14.5%)</span></div>
+              <div>주말(토·일) 평균: <span class="font-bold text-slate-400">56.1대 (14.2%)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table: 수도권 상세 TC별 차량 대수 (10월) -->
+        <div class="p-6 rounded-2xl bg-[#161f33] border border-slate-800">
+          <h4 class="text-sm font-bold text-white mb-3">수도권 및 전 권역 10월 세부 TC별 차량 배차 대수 실적 (월평균 1,822대)</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div class="p-4 bg-[#0f172a] border border-slate-800 rounded-xl">
+              <div class="font-bold text-[#60a5fa] mb-1.5">김포 권역 TC (총 908대)</div>
+              <div class="text-slate-300 space-y-1">
+                <div>· T: 127대 / S: 123대 / Z: 123대</div>
+                <div>· F: 122대 / A: 106대 / C: 93대</div>
+                <div>· W: 90대 / R: 62대 / X: 62대</div>
+              </div>
+            </div>
+            <div class="p-4 bg-[#0f172a] border border-slate-800 rounded-xl">
+              <div class="font-bold text-[#60a5fa] mb-1.5">평택 권역 TC (총 547대)</div>
+              <div class="text-slate-300 space-y-1">
+                <div>· Y: 178대 (단일 TC 최다)</div>
+                <div>· M: 124대 / H: 124대</div>
+                <div>· U: 121대</div>
+              </div>
+            </div>
+            <div class="p-4 bg-[#0f172a] border border-slate-800 rounded-xl">
+              <div class="font-bold text-slate-200 mb-1.5">충청권 TC (총 96대)</div>
+              <div class="text-slate-300 space-y-1">
+                <div>· CS: 35대</div>
+                <div>· CA: 31대</div>
+                <div>· DJ: 30대</div>
+              </div>
+            </div>
+            <div class="p-4 bg-[#0f172a] border border-slate-800 rounded-xl">
+              <div class="font-bold text-slate-200 mb-1.5">동남/호남권 TC (총 324대)</div>
+              <div class="text-slate-300 space-y-1">
+                <div>· 동남: BS 63, GC 52, 이 외 124 (총 239대)</div>
+                <div>· 호남: YS 31, JI 30, JU 13, GW 11 (총 85대)</div>
+                <div class="text-[#34d399] font-medium">※ 10월 전 권역 총 1,875대 배차 완료</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-4 border-t border-slate-800 flex justify-between text-xs text-slate-500">
+        <span></span>
+        <span>3 / 5</span>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 4: 계약 구조 & 종합 데이터 테이블 ================= -->
+    <section class="report-page p-8 md:p-10 rounded-3xl mb-12 flex flex-col justify-between">
+      <div>
+        <!-- Page Header -->
+        <div class="border-b-2 border-slate-700 pb-4 mb-6 flex justify-between items-end">
+          <div>
+            <span class="text-xs font-bold tracking-widest uppercase text-[#60a5fa]">PAGE 04 • DATA & RATES</span>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">권역별 계약 기준 및 종합 실적 데이터</h1>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold px-3.5 py-1.5 bg-[#1e293b] text-[#60a5fa] border border-slate-700 rounded-full">PAGE 4 / 5</span>
+          </div>
+        </div>
+
+        <!-- Contract Structure Cards -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">권역별 부자재 회수 및 월 고정비용 기준</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5 text-xs">
+            <div class="p-3.5 rounded-2xl bg-[#161f33] border border-slate-800 border-t-4 border-t-[#3b82f6]">
+              <div class="text-sm font-bold text-[#60a5fa] mb-1.5">수도권</div>
+              <div class="space-y-1 text-slate-300">
+                <div class="flex justify-between"><span>2CC:</span><span class="font-semibold text-white">1회 / 15,000원</span></div>
+                <div class="flex justify-between"><span>3CC:</span><span class="font-semibold text-white">1회 / 15,000원</span></div>
+                <div class="flex justify-between text-slate-500"><span>고정비:</span><span>해당 없음</span></div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-[#161f33] border border-slate-800 border-t-4 border-t-[#2563eb]">
+              <div class="text-sm font-bold text-[#60a5fa] mb-1.5">충청권</div>
+              <div class="space-y-1 text-slate-300">
+                <div class="flex justify-between"><span>CA:</span><span class="font-semibold text-white">1회 / 15,000원</span></div>
+                <div class="flex justify-between"><span>CS:</span><span class="font-semibold text-white">월 5,000,000원</span></div>
+                <div class="flex justify-between"><span>DJ:</span><span class="font-semibold text-white">월 5,000,000원</span></div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-[#161f33] border border-slate-800 border-t-4 border-t-[#60a5fa]">
+              <div class="text-sm font-bold text-[#60a5fa] mb-1.5">동남권</div>
+              <div class="space-y-1 text-slate-300">
+                <div class="flex justify-between"><span>BS / GC:</span><span class="font-semibold text-white">1회 / 15,000원</span></div>
+                <div class="flex justify-between"><span>DE / DW:</span><span class="font-semibold text-white">월 4,650,000원</span></div>
+                <div class="flex justify-between"><span>UL / PG:</span><span class="font-semibold text-white">월 2,790,000원</span></div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-[#161f33] border border-slate-800 border-t-4 border-t-[#93c5fd]">
+              <div class="text-sm font-bold text-[#60a5fa] mb-1.5">호남권</div>
+              <div class="space-y-1 text-slate-300">
+                <div class="flex justify-between"><span>GW:</span><span class="font-semibold text-white">1회 / 481,500원</span></div>
+                <div class="flex justify-between"><span>JU:</span><span class="font-semibold text-white">1회 / 272,000원</span></div>
+                <div class="flex justify-between"><span>YS / JI:</span><span class="font-semibold text-white">월 3,260,000 / 2,790,000원</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Data Table -->
+        <div class="rounded-2xl border border-slate-800 overflow-hidden mb-4">
+          <div class="bg-[#0b0f19] px-4 py-2.5 border-b border-slate-800 flex justify-between items-center">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider">2026년 월별 권역별 BP 및 실제비용 종합 집계표 (1~10월 전체)</h4>
+            <span class="text-[11px] font-semibold text-slate-400">단위: 원 / %</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-[11px] text-left">
+              <thead class="bg-[#161f33] text-slate-300 border-b border-slate-800 font-semibold">
+                <tr>
+                  <th class="py-2 px-3 whitespace-nowrap">구분</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">1월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">2월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">3월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">4월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">5월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">6월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">7월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">8월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">9월</th>
+                  <th class="py-2 px-2 text-right whitespace-nowrap">10월</th>
+                  <th class="py-2 px-3 text-right whitespace-nowrap bg-[#1e293b] text-[#60a5fa] font-bold">1~10월 누계</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/70 text-slate-300 bg-[#111827]">
+                <!-- BP 회수 -->
+                <tr class="bg-[#161f33] font-bold text-white">
+                  <td class="py-2 px-3 whitespace-nowrap">BP 회수 합계</td>
+                  <td class="py-2 px-2 text-right">71,750,000</td>
+                  <td class="py-2 px-2 text-right">71,750,000</td>
+                  <td class="py-2 px-2 text-right">74,750,000</td>
+                  <td class="py-2 px-2 text-right">74,750,000</td>
+                  <td class="py-2 px-2 text-right">80,250,000</td>
+                  <td class="py-2 px-2 text-right">76,480,000</td>
+                  <td class="py-2 px-2 text-right">76,230,000</td>
+                  <td class="py-2 px-2 text-right">76,230,000</td>
+                  <td class="py-2 px-2 text-right">76,480,000</td>
+                  <td class="py-2 px-2 text-right">76,480,000</td>
+                  <td class="py-2 px-3 text-right font-black bg-[#1e293b] text-white">755,150,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 수도권 BP</td>
+                  <td class="py-1.5 px-2 text-right">21,500,000</td>
+                  <td class="py-1.5 px-2 text-right">21,500,000</td>
+                  <td class="py-1.5 px-2 text-right">24,500,000</td>
+                  <td class="py-1.5 px-2 text-right">24,500,000</td>
+                  <td class="py-1.5 px-2 text-right">30,000,000</td>
+                  <td class="py-1.5 px-2 text-right">24,500,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">246,500,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 충청권 BP</td>
+                  <td class="py-1.5 px-2 text-right">11,970,000</td>
+                  <td class="py-1.5 px-2 text-right">11,970,000</td>
+                  <td class="py-1.5 px-2 text-right">11,970,000</td>
+                  <td class="py-1.5 px-2 text-right">11,970,000</td>
+                  <td class="py-1.5 px-2 text-right">11,970,000</td>
+                  <td class="py-1.5 px-2 text-right">13,700,000</td>
+                  <td class="py-1.5 px-2 text-right">12,950,000</td>
+                  <td class="py-1.5 px-2 text-right">12,950,000</td>
+                  <td class="py-1.5 px-2 text-right">13,200,000</td>
+                  <td class="py-1.5 px-2 text-right">13,200,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">125,850,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 동남권 BP</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-2 text-right">18,000,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">180,000,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 호남권 BP</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-2 text-right">20,280,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">202,800,000</td>
+                </tr>
+
+                <!-- 실제 회수비용 -->
+                <tr class="bg-[#162238] font-bold text-white border-t border-blue-900/60">
+                  <td class="py-2 px-3 text-[#60a5fa] whitespace-nowrap">실제 회수비용 합계</td>
+                  <td class="py-2 px-2 text-right">65,586,000</td>
+                  <td class="py-2 px-2 text-right">62,556,000</td>
+                  <td class="py-2 px-2 text-right">65,316,000</td>
+                  <td class="py-2 px-2 text-right">65,826,000</td>
+                  <td class="py-2 px-2 text-right">66,396,000</td>
+                  <td class="py-2 px-2 text-right">63,306,000</td>
+                  <td class="py-2 px-2 text-right">64,371,000</td>
+                  <td class="py-2 px-2 text-right">64,281,000</td>
+                  <td class="py-2 px-2 text-right">62,871,000</td>
+                  <td class="py-2 px-2 text-right">63,996,000</td>
+                  <td class="py-2 px-3 text-right font-black text-[#60a5fa] bg-[#1e293b]">644,505,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 수도권 실적</td>
+                  <td class="py-1.5 px-2 text-right">20,985,000</td>
+                  <td class="py-1.5 px-2 text-right">18,120,000</td>
+                  <td class="py-1.5 px-2 text-right">20,685,000</td>
+                  <td class="py-1.5 px-2 text-right">21,300,000</td>
+                  <td class="py-1.5 px-2 text-right">21,720,000</td>
+                  <td class="py-1.5 px-2 text-right">18,600,000</td>
+                  <td class="py-1.5 px-2 text-right">19,320,000</td>
+                  <td class="py-1.5 px-2 text-right">19,350,000</td>
+                  <td class="py-1.5 px-2 text-right">18,090,000</td>
+                  <td class="py-1.5 px-2 text-right">19,155,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">197,325,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 충청권 실적</td>
+                  <td class="py-1.5 px-2 text-right">10,465,000</td>
+                  <td class="py-1.5 px-2 text-right">10,405,000</td>
+                  <td class="py-1.5 px-2 text-right">10,465,000</td>
+                  <td class="py-1.5 px-2 text-right">10,435,000</td>
+                  <td class="py-1.5 px-2 text-right">10,465,000</td>
+                  <td class="py-1.5 px-2 text-right">10,450,000</td>
+                  <td class="py-1.5 px-2 text-right">10,465,000</td>
+                  <td class="py-1.5 px-2 text-right">10,465,000</td>
+                  <td class="py-1.5 px-2 text-right">10,435,000</td>
+                  <td class="py-1.5 px-2 text-right">10,465,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">104,515,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 동남권 실적</td>
+                  <td class="py-1.5 px-2 text-right">16,365,000</td>
+                  <td class="py-1.5 px-2 text-right">16,260,000</td>
+                  <td class="py-1.5 px-2 text-right">16,395,000</td>
+                  <td class="py-1.5 px-2 text-right">16,320,000</td>
+                  <td class="py-1.5 px-2 text-right">16,440,000</td>
+                  <td class="py-1.5 px-2 text-right">16,485,000</td>
+                  <td class="py-1.5 px-2 text-right">16,815,000</td>
+                  <td class="py-1.5 px-2 text-right">16,695,000</td>
+                  <td class="py-1.5 px-2 text-right">16,575,000</td>
+                  <td class="py-1.5 px-2 text-right">16,605,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">164,955,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-400 whitespace-nowrap">· 호남권 실적</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-2 text-right">17,771,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-medium">177,710,000</td>
+                </tr>
+
+                <!-- 절감비용 & 절감율 -->
+                <tr class="bg-[#0f2922] font-bold text-[#34d399] border-t border-emerald-800/60">
+                  <td class="py-2 px-3 whitespace-nowrap">절감비용 (BP-실적)</td>
+                  <td class="py-2 px-2 text-right">6,164,000</td>
+                  <td class="py-2 px-2 text-right">9,194,000</td>
+                  <td class="py-2 px-2 text-right">9,434,000</td>
+                  <td class="py-2 px-2 text-right">8,924,000</td>
+                  <td class="py-2 px-2 text-right">13,854,000</td>
+                  <td class="py-2 px-2 text-right">13,174,000</td>
+                  <td class="py-2 px-2 text-right">11,859,000</td>
+                  <td class="py-2 px-2 text-right">11,949,000</td>
+                  <td class="py-2 px-2 text-right">13,609,000</td>
+                  <td class="py-2 px-2 text-right">12,484,000</td>
+                  <td class="py-2 px-3 text-right font-black bg-emerald-950">110,645,000</td>
+                </tr>
+                <tr class="bg-[#2563eb] text-white font-bold">
+                  <td class="py-2 px-3 whitespace-nowrap">BP 比 절감율 (%)</td>
+                  <td class="py-2 px-2 text-right">9.40%</td>
+                  <td class="py-2 px-2 text-right">14.70%</td>
+                  <td class="py-2 px-2 text-right">14.44%</td>
+                  <td class="py-2 px-2 text-right">13.56%</td>
+                  <td class="py-2 px-2 text-right">20.87%</td>
+                  <td class="py-2 px-2 text-right">20.81%</td>
+                  <td class="py-2 px-2 text-right">18.42%</td>
+                  <td class="py-2 px-2 text-right">18.59%</td>
+                  <td class="py-2 px-2 text-right">21.65%</td>
+                  <td class="py-2 px-2 text-right">19.51%</td>
+                  <td class="py-2 px-3 text-right font-black bg-[#1d4ed8]">17.17%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-500">
+        <span>* 누계 절감율(17.17%)은 원본 시트 산출 기준(누적 절감비용 ÷ 누적 실제 회수비용) 적용</span>
+        <span>4 / 5</span>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 5: 2027년도 수도권 회당 단가 인하 절감 시뮬레이션 ================= -->
+    <section class="report-page p-8 md:p-10 rounded-3xl flex flex-col justify-between">
+      <div>
+        <!-- Page Header -->
+        <div class="border-b-2 border-slate-700 pb-4 mb-6 flex justify-between items-end">
+          <div>
+            <span class="text-xs font-bold tracking-widest uppercase text-[#60a5fa]">PAGE 05 • 2027 COST REDUCTION</span>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">2027년도 수도권 회당 단가 인하에 따른 비용절감 분석</h1>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold px-3.5 py-1.5 bg-[#2563eb] text-white rounded-full">회당 15,000원 → 13,500원 (-10%)</span>
+          </div>
+        </div>
+
+        <!-- 2027 KPI Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="p-5 rounded-2xl bg-[#161f33] border border-slate-800 border-l-4 border-l-slate-400">
+            <span class="text-xs font-semibold text-slate-400">수도권 회당 단가 개선</span>
+            <div class="text-2xl font-black text-white mt-1.5">13,500원 <span class="text-sm font-bold text-[#60a5fa]">(-1,500원)</span></div>
+            <div class="text-xs text-slate-400 mt-1">기존 15,000원 대비 10.0% 단가 인하</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-[#162238] border border-blue-900/60 border-l-4 border-l-[#3b82f6]">
+            <span class="text-xs font-semibold text-[#60a5fa]">1~10월 기준 추가 절감액</span>
+            <div class="text-2xl font-black text-white mt-1.5">21,141,000원</div>
+            <div class="text-xs font-bold text-[#34d399] mt-1">월평균 2,114,100원 추가 절감 (14,094대)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-[#0f2922] border border-emerald-800/60 border-l-4 border-l-[#10b981]">
+            <span class="text-xs font-semibold text-[#34d399]">BP 대비 절감율 개선폭</span>
+            <div class="text-2xl font-black text-[#34d399] mt-1.5">+12.95%p</div>
+            <div class="text-xs text-slate-400 mt-1">평균 16.59% → 29.54%로 대폭 상승</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-[#161f33] border border-slate-800 border-l-4 border-l-slate-500">
+            <span class="text-xs font-semibold text-slate-400">연간 환산 예상 추가 절감</span>
+            <div class="text-2xl font-black text-white mt-1.5">약 2,537만 원</div>
+            <div class="text-xs text-slate-400 mt-1">동일 배차 물량 기준 12개월 환산 시</div>
+          </div>
+        </div>
+
+        <!-- Chart: 2026(15,000원) vs 2027(13,500원) 월별 비용 비교 -->
+        <div class="p-5 rounded-2xl bg-[#161f33] border border-slate-800 mb-6">
+          <div class="flex justify-between items-center mb-3">
+            <div>
+              <h3 class="text-base font-bold text-white">수도권 월별 회수비용 비교 및 단가 인하 절감액 (1~10월 물량 기준)</h3>
+              <p class="text-xs text-slate-400">기존(15,000원) vs 2027년(13,500원) 집행비용(백만 원) 및 절감율 개선 추이</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs font-semibold text-slate-300">
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-500 rounded-sm"></span>기존 비용(15,000원)</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-[#3b82f6] rounded-sm"></span>2027 비용(13,500원)</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-[#10b981]"></span>개선 절감율(%)</span>
+            </div>
+          </div>
+          <div class="h-56 w-full">
+            <canvas id="chart2027Saving"></canvas>
+          </div>
+        </div>
+
+        <!-- Detailed Simulation Table -->
+        <div class="rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="bg-[#0b0f19] px-4 py-2 border-b border-slate-800 flex justify-between items-center">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider">수도권 단가 인하(15,000원 → 13,500원) 월별 상세 절감 내역</h4>
+            <span class="text-[11px] font-semibold text-slate-400">단위: 원 / 대 / %</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-[11px] text-left">
+              <thead class="bg-[#161f33] text-slate-300 border-b border-slate-800 font-semibold">
+                <tr>
+                  <th class="py-1.5 px-3 whitespace-nowrap">구분</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">1월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">2월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">3월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">4월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">5월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">6월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">7월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">8월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">9월</th>
+                  <th class="py-1.5 px-2 text-right whitespace-nowrap">10월</th>
+                  <th class="py-1.5 px-3 text-right whitespace-nowrap bg-[#1e293b] text-[#60a5fa] font-bold">1~10월 누계/평균</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/70 text-slate-300 bg-[#111827]">
+                <tr class="bg-[#161f33] font-bold text-white">
+                  <td class="py-1.5 px-3 whitespace-nowrap">수도권 BP 예산</td>
+                  <td class="py-1.5 px-2 text-right">21,500,000</td>
+                  <td class="py-1.5 px-2 text-right">21,500,000</td>
+                  <td class="py-1.5 px-2 text-right">24,500,000</td>
+                  <td class="py-1.5 px-2 text-right">24,500,000</td>
+                  <td class="py-1.5 px-2 text-right">30,000,000</td>
+                  <td class="py-1.5 px-2 text-right">24,500,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-2 text-right">25,000,000</td>
+                  <td class="py-1.5 px-3 text-right font-black bg-[#1e293b]">246,500,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 whitespace-nowrap">회수차량 (대)</td>
+                  <td class="py-1.5 px-2 text-right">1,399</td>
+                  <td class="py-1.5 px-2 text-right">1,208</td>
+                  <td class="py-1.5 px-2 text-right">1,379</td>
+                  <td class="py-1.5 px-2 text-right">1,420</td>
+                  <td class="py-1.5 px-2 text-right">1,448</td>
+                  <td class="py-1.5 px-2 text-right">1,392</td>
+                  <td class="py-1.5 px-2 text-right">1,458</td>
+                  <td class="py-1.5 px-2 text-right">1,466</td>
+                  <td class="py-1.5 px-2 text-right">1,369</td>
+                  <td class="py-1.5 px-2 text-right">1,455</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-semibold">14,094대</td>
+                </tr>
+                <!-- 기존 15,000원 -->
+                <tr>
+                  <td class="py-1.5 px-3 text-slate-400 whitespace-nowrap">기존 비용 (15,000원)</td>
+                  <td class="py-1.5 px-2 text-right">20,985,000</td>
+                  <td class="py-1.5 px-2 text-right">18,120,000</td>
+                  <td class="py-1.5 px-2 text-right">20,685,000</td>
+                  <td class="py-1.5 px-2 text-right">21,300,000</td>
+                  <td class="py-1.5 px-2 text-right">21,720,000</td>
+                  <td class="py-1.5 px-2 text-right">20,880,000</td>
+                  <td class="py-1.5 px-2 text-right">21,870,000</td>
+                  <td class="py-1.5 px-2 text-right">21,990,000</td>
+                  <td class="py-1.5 px-2 text-right">20,535,000</td>
+                  <td class="py-1.5 px-2 text-right">21,825,000</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 font-semibold">211,410,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-slate-500 whitespace-nowrap">· 기존 BP 比 절감율</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">2.45%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">18.65%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">18.44%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">15.02%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">38.12%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">17.34%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">14.31%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">13.69%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">21.74%</td>
+                  <td class="py-1.5 px-2 text-right text-slate-500">14.55%</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 text-slate-400 font-semibold">16.59%</td>
+                </tr>
+                <!-- 2027년 13,500원 -->
+                <tr class="bg-[#162238] font-bold text-white border-t border-blue-900/60">
+                  <td class="py-1.5 px-3 text-[#60a5fa] whitespace-nowrap">2027 비용 (13,500원)</td>
+                  <td class="py-1.5 px-2 text-right">18,886,500</td>
+                  <td class="py-1.5 px-2 text-right">16,308,000</td>
+                  <td class="py-1.5 px-2 text-right">18,616,500</td>
+                  <td class="py-1.5 px-2 text-right">19,170,000</td>
+                  <td class="py-1.5 px-2 text-right">19,548,000</td>
+                  <td class="py-1.5 px-2 text-right">18,792,000</td>
+                  <td class="py-1.5 px-2 text-right">19,683,000</td>
+                  <td class="py-1.5 px-2 text-right">19,791,000</td>
+                  <td class="py-1.5 px-2 text-right">18,481,500</td>
+                  <td class="py-1.5 px-2 text-right">19,642,500</td>
+                  <td class="py-1.5 px-3 text-right font-black text-[#60a5fa] bg-[#1e293b]">190,269,000</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 px-3 pl-5 text-[#60a5fa] font-semibold whitespace-nowrap">· 2027 BP 比 절감율</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">13.84%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">31.84%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">31.60%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">27.80%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">53.47%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">30.37%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">27.01%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">26.32%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">35.27%</td>
+                  <td class="py-1.5 px-2 text-right text-[#60a5fa] font-semibold">27.28%</td>
+                  <td class="py-1.5 px-3 text-right bg-[#161f33]/70 text-[#60a5fa] font-bold">29.54%</td>
+                </tr>
+                <tr class="bg-[#0f2922]/70 text-[#34d399] font-bold">
+                  <td class="py-1.5 px-3 pl-5 whitespace-nowrap">· 절감율 개선폭 (%p)</td>
+                  <td class="py-1.5 px-2 text-right">+11.38%p</td>
+                  <td class="py-1.5 px-2 text-right">+13.18%p</td>
+                  <td class="py-1.5 px-2 text-right">+13.16%p</td>
+                  <td class="py-1.5 px-2 text-right">+12.78%p</td>
+                  <td class="py-1.5 px-2 text-right">+15.35%p</td>
+                  <td class="py-1.5 px-2 text-right">+13.04%p</td>
+                  <td class="py-1.5 px-2 text-right">+12.70%p</td>
+                  <td class="py-1.5 px-2 text-right">+12.63%p</td>
+                  <td class="py-1.5 px-2 text-right">+13.53%p</td>
+                  <td class="py-1.5 px-2 text-right">+12.73%p</td>
+                  <td class="py-1.5 px-3 text-right font-black">+12.95%p</td>
+                </tr>
+                <tr class="bg-[#10b981] text-slate-950 font-black">
+                  <td class="py-2 px-3 whitespace-nowrap">단가인하 절감비용</td>
+                  <td class="py-2 px-2 text-right">2,098,500</td>
+                  <td class="py-2 px-2 text-right">1,812,000</td>
+                  <td class="py-2 px-2 text-right">2,068,500</td>
+                  <td class="py-2 px-2 text-right">2,130,000</td>
+                  <td class="py-2 px-2 text-right">2,172,000</td>
+                  <td class="py-2 px-2 text-right">2,088,000</td>
+                  <td class="py-2 px-2 text-right">2,187,000</td>
+                  <td class="py-2 px-2 text-right">2,199,000</td>
+                  <td class="py-2 px-2 text-right">2,053,500</td>
+                  <td class="py-2 px-2 text-right">2,182,500</td>
+                  <td class="py-2 px-3 text-right bg-[#059669] text-white">21,141,000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-500">
+        <span>* 수도권 회수차량 14,094대(1~10월 실적) 기준 회당 단가 1,500원 인하(15,000원 → 13,500원) 시뮬레이션 결과</span>
+        <span>5 / 5</span>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Chart.js Logic (Dark Mode Optimized) -->
+  <script>
+    Chart.register(ChartDataLabels);
+
+    Chart.defaults.font.family = "'Pretendard', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#94a3b8';
+
+    // Dark Mode Palette
+    const BLUE_MAIN    = '#3b82f6';
+    const BLUE_DEEP    = '#1d4ed8';
+    const BLUE_LIGHT   = '#60a5fa';
+    const BLUE_SKY     = '#93c5fd';
+    const GREEN_BRIGHT = '#34d399';
+    const GREEN_MAIN   = '#10b981';
+    const SLATE_BAR    = '#475569';
+    const GRID_DARK    = '#1e293b';
+
+    // 1. Page 1 Left: 권역별 BP · 실제비용 · 절감액 비교
+    new Chart(document.getElementById('chartRegionComp').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: [
+          ['수도권', '(절감 19.95%)'],
+          ['충청권', '(절감 16.95%)'],
+          ['동남권', '(절감 8.36%)'],
+          ['호남권', '(절감 12.37%)']
+        ],
+        datasets: [
+          {
+            label: 'BP',
+            data: [246.5, 125.9, 180.0, 202.8],
+            backgroundColor: SLATE_BAR,
+            borderRadius: 4,
+            datalabels: {
+              anchor: 'end', align: 'top', offset: 1,
+              color: '#cbd5e1', font: { weight: 'bold', size: 10 },
+              formatter: (v) => v.toFixed(1)
+            }
+          },
+          {
+            label: '실제',
+            data: [197.3, 104.5, 165.0, 177.7],
+            backgroundColor: BLUE_MAIN,
+            borderRadius: 4,
+            datalabels: {
+              anchor: 'end', align: 'top', offset: 1,
+              color: BLUE_LIGHT, font: { weight: 'bold', size: 10 },
+              formatter: (v) => v.toFixed(1)
+            }
+          },
+          {
+            label: '절감액',
+            data: [49.2, 21.3, 15.0, 25.1],
+            backgroundColor: GREEN_MAIN,
+            borderRadius: 4,
+            datalabels: {
+              anchor: 'end', align: 'top', offset: 1,
+              color: GREEN_BRIGHT, font: { weight: 'bold', size: 10 },
+              formatter: (v) => v.toFixed(1)
+            }
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 22 } },
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            min: 0, max: 285,
+            ticks: { stepSize: 70, color: '#94a3b8' },
+            grid: { color: GRID_DARK }
+          },
+          x: {
+            ticks: { color: '#e2e8f0', font: { weight: 'bold', size: 11 } },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+
+    // 2. Page 1 Right: 권역별 총 절감액 기여도 도넛
+    new Chart(document.getElementById('chartRegionDonut').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['수도권', '호남권', '충청권', '동남권'],
+        datasets: [{
+          data: [44.4, 22.7, 19.3, 13.6],
+          backgroundColor: [BLUE_DEEP, BLUE_MAIN, BLUE_LIGHT, BLUE_SKY],
+          borderWidth: 2,
+          borderColor: '#161f33'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '56%',
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            color: (ctx) => ctx.dataIndex >= 2 ? '#0f172a' : '#ffffff',
+            font: { weight: 'bold', size: 10.5 },
+            formatter: (v) => v.toFixed(1) + '%'
+          }
+        }
+      }
+    });
+
+    // 3. Page 2 Top: BP vs Actual Cost Trend
+    new Chart(document.getElementById('chartTrend').getContext('2d'), {
+      data: {
+        labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월'],
+        datasets: [
+          {
+            type: 'line',
+            label: '절감율(%)',
+            data: [9.40, 14.70, 14.44, 13.56, 20.87, 20.81, 18.42, 18.59, 21.65, 19.51],
+            borderColor: GREEN_MAIN,
+            backgroundColor: GREEN_MAIN,
+            borderWidth: 2.5,
+            pointRadius: 4.5,
+            pointBackgroundColor: '#111827',
+            pointBorderColor: GREEN_BRIGHT,
+            pointBorderWidth: 2,
+            yAxisID: 'yRate',
+            datalabels: {
+              align: 'top', anchor: 'end',
+              color: GREEN_BRIGHT,
+              font: { weight: 'bold', size: 10.5 },
+              formatter: (v) => v.toFixed(1) + '%'
+            }
+          },
+          {
+            type: 'bar',
+            label: 'BP회수 (백만원)',
+            data: [71.75, 71.75, 74.75, 74.75, 80.25, 76.48, 76.23, 76.23, 76.48, 76.48],
+            backgroundColor: SLATE_BAR,
+            borderRadius: 4,
+            yAxisID: 'yCost',
+            datalabels: { display: false }
+          },
+          {
+            type: 'bar',
+            label: '회수비용 (백만원)',
+            data: [65.59, 62.56, 65.32, 65.83, 66.40, 63.31, 64.37, 64.28, 62.87, 64.00],
+            backgroundColor: BLUE_MAIN,
+            borderRadius: 4,
+            yAxisID: 'yCost',
+            datalabels: {
+              align: 'end', anchor: 'end',
+              color: BLUE_LIGHT,
+              font: { weight: 'bold', size: 10 },
+              formatter: (v) => v.toFixed(1) + 'M'
+            }
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 24 } },
+        plugins: { legend: { display: false } },
+        scales: {
+          yCost: {
+            position: 'left', min: 50, max: 95,
+            ticks: { callback: v => v + 'M', color: '#94a3b8' },
+            grid: { color: GRID_DARK }
+          },
+          yRate: {
+            position: 'right', min: 0, max: 30,
+            ticks: { callback: v => v + '%', color: GREEN_BRIGHT },
+            grid: { drawOnChartArea: false }
+          },
+          x: { ticks: { color: '#cbd5e1' }, grid: { display: false } }
+        }
+      }
+    });
+
+    // 4. Page 2 Left: 부자재 품목 비중
+    new Chart(document.getElementById('chartItemShare').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['회수 파레트', '재사용 포장재', '반품 파레트', '단프라 파레트'],
+        datasets: [{
+          data: [9169.1, 8912.6, 1294.5, 943.9],
+          backgroundColor: [BLUE_DEEP, BLUE_MAIN, BLUE_LIGHT, SLATE_BAR],
+          borderWidth: 2,
+          borderColor: '#161f33'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '55%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 12 } },
+          datalabels: {
+            color: '#ffffff',
+            font: { weight: 'bold', size: 10.5 },
+            formatter: (value, ctx) => {
+              const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = (value / sum) * 100;
+              if (pct < 8) return '';
+              return Math.round(value).toLocaleString() + '\n(' + pct.toFixed(1) + '%)';
+            },
+            textAlign: 'center'
+          }
+        }
+      }
+    });
+
+    // 5. Page 2 Right: 권역별 회수비용 (10월)
+    new Chart(document.getElementById('chartRegional').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['수도권', '호남권', '동남권', '충청권'],
+        datasets: [{
+          data: [19.16, 17.77, 16.61, 10.47],
+          backgroundColor: [BLUE_DEEP, BLUE_MAIN, BLUE_LIGHT, BLUE_SKY],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 24 } },
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            anchor: 'end', align: 'top',
+            color: '#e2e8f0',
+            font: { weight: 'bold', size: 10.5 },
+            formatter: (v) => {
+              const total = 64.00;
+              const pct = ((v / total) * 100).toFixed(1);
+              return v.toFixed(1) + 'M (' + pct + '%)';
+            }
+          }
+        },
+        scales: {
+          y: { min: 0, max: 25, ticks: { callback: v => v + 'M', color: '#94a3b8' }, grid: { color: GRID_DARK } },
+          x: { ticks: { color: '#cbd5e1' }, grid: { display: false } }
+        }
+      }
+    });
+
+    // 6. Page 3 Left: 김포 TC vs 평택 TC 추이
+    new Chart(document.getElementById('chartHub').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['7월', '8월', '9월', '10월'],
+        datasets: [
+          {
+            label: '김포 TC',
+            data: [13.70, 13.82, 12.81, 13.62],
+            backgroundColor: BLUE_MAIN,
+            borderRadius: 4,
+            datalabels: {
+              anchor: 'end', align: 'top',
+              color: BLUE_LIGHT,
+              font: { weight: 'bold', size: 10 },
+              formatter: v => v.toFixed(1) + 'M'
+            }
+          },
+          {
+            label: '평택 TC',
+            data: [8.18, 8.18, 7.73, 8.21],
+            backgroundColor: SLATE_BAR,
+            borderRadius: 4,
+            datalabels: {
+              anchor: 'end', align: 'top',
+              color: '#cbd5e1',
+              font: { weight: 'bold', size: 10 },
+              formatter: v => v.toFixed(1) + 'M'
+            }
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 24 } },
+        plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1' } } },
+        scales: {
+          y: { min: 0, max: 18, ticks: { callback: v => v + 'M', color: '#94a3b8' }, grid: { color: GRID_DARK } },
+          x: { ticks: { color: '#cbd5e1' }, grid: { display: false } }
+        }
+      }
+    });
+
+    // 7. Page 3 Right: 요일별 일평균 회수차량 배차 패턴
+    new Chart(document.getElementById('chartDayPattern').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'],
+        datasets: [{
+          data: [55.4, 57.4, 57.4, 57.3, 56.5, 57.2, 55.0],
+          backgroundColor: [BLUE_MAIN, BLUE_DEEP, BLUE_DEEP, BLUE_MAIN, BLUE_LIGHT, SLATE_BAR, SLATE_BAR],
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 26 } },
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            anchor: 'end', align: 'top',
+            color: '#e2e8f0',
+            font: { weight: 'bold', size: 10 },
+            formatter: (v) => {
+              const total = 396.2;
+              const pct = ((v / total) * 100).toFixed(1);
+              return v.toFixed(1) + '대\n(' + pct + '%)';
+            },
+            textAlign: 'center'
+          }
+        },
+        scales: {
+          y: { min: 40, max: 66, ticks: { callback: v => v + '대', color: '#94a3b8' }, grid: { color: GRID_DARK } },
+          x: { ticks: { color: '#cbd5e1' }, grid: { display: false } }
+        }
+      }
+    });
+
+    // 8. Page 5: 2027 수도권 단가 인하(15,000원 -> 13,500원) 비교 차트
+    new Chart(document.getElementById('chart2027Saving').getContext('2d'), {
+      data: {
+        labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월'],
+        datasets: [
+          {
+            type: 'line',
+            label: '2027 BP 比 절감율(%)',
+            data: [13.84, 31.84, 31.60, 27.80, 53.47, 30.37, 27.01, 26.32, 35.27, 27.28],
+            borderColor: GREEN_MAIN,
+            backgroundColor: GREEN_MAIN,
+            borderWidth: 2.5,
+            pointRadius: 4.5,
+            pointBackgroundColor: '#111827',
+            pointBorderColor: GREEN_BRIGHT,
+            pointBorderWidth: 2,
+            yAxisID: 'yRate',
+            datalabels: {
+              align: 'top', anchor: 'end',
+              color: GREEN_BRIGHT,
+              font: { weight: 'bold', size: 10 },
+              formatter: (v) => v.toFixed(1) + '%'
+            }
+          },
+          {
+            type: 'bar',
+            label: '기존 비용 (15,000원)',
+            data: [20.99, 18.12, 20.69, 21.30, 21.72, 20.88, 21.87, 21.99, 20.54, 21.83],
+            backgroundColor: SLATE_BAR,
+            borderRadius: 4,
+            yAxisID: 'yCost',
+            datalabels: { display: false }
+          },
+          {
+            type: 'bar',
+            label: '2027 비용 (13,500원)',
+            data: [18.89, 16.31, 18.62, 19.17, 19.55, 18.79, 19.68, 19.79, 18.48, 19.64],
+            backgroundColor: BLUE_MAIN,
+            borderRadius: 4,
+            yAxisID: 'yCost',
+            datalabels: {
+              align: 'end', anchor: 'end',
+              color: BLUE_LIGHT,
+              font: { weight: 'bold', size: 10 },
+              formatter: (v) => v.toFixed(1) + 'M'
+            }
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 22 } },
+        plugins: { legend: { display: false } },
+        scales: {
+          yCost: {
+            position: 'left', min: 10, max: 26,
+            ticks: { callback: v => v + 'M', color: '#94a3b8' },
+            grid: { color: GRID_DARK }
+          },
+          yRate: {
+            position: 'right', min: 0, max: 65,
+            ticks: { callback: v => v + '%', color: GREEN_BRIGHT },
+            grid: { drawOnChartArea: false }
+          },
+          x: { ticks: { color: '#cbd5e1' }, grid: { display: false } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
